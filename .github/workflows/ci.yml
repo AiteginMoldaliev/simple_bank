@@ -41,7 +41,7 @@ jobs:
       uses: actions/checkout@v2
 
     - name: Install migrate-golang
-      run: $ curl -L https://github.com/golang-migrate/migrate/releases/download/$version/migrate.$os-$arch.tar.gz | tar xvz
+      run: curl -L https://github.com/golang-migrate/migrate/releases/download/$version/migrate.$os-$arch.tar.gz | tar xvz
 
     - name: DataBase migrate
       run: migrate -path db/migration -database "postgresql://root:secret@localhost:5432/simple_bank?sslmode=disable" -verbose up
