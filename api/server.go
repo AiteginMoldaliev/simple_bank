@@ -15,7 +15,7 @@ import (
 type Server struct {
 	config      util.Config
 	store       *db.SQLStore
-	jwtMaker    token.JwtMaker
+	// jwtMaker    token.JwtMaker  // can use this method
 	pasetoMaker token.PMaker
 	router      *gin.Engine
 }
