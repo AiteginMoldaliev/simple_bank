@@ -28,6 +28,13 @@ VALUES (
 )
 RETURNING *;
 
+-- name: GetAllAccountsByOwner :many
+SELECT * FROM accounts
+WHERE owner = $1
+ORDER BY id
+LIMIT $2
+OFFSET $3;
+
 -- name: GetAllAccounts :many
 SELECT * FROM accounts
 ORDER BY id

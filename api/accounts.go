@@ -2,14 +2,17 @@ package api
 
 import (
 	"database/sql"
+	"errors"
 	"net/http"
 	db "simple-bank/db/sqlc"
+	"simple-bank/token"
+	"simple-bank/util"
 
 	"github.com/gin-gonic/gin"
+	"github.com/lib/pq"
 )
 
 type creatAccountRequest struct {
-	Owner    string `json:"owner" binding:"required"`
 	Currency string `json:"currency" binding:"required,currency"`
 }
 
@@ -20,14 +23,28 @@ func (server *Server) creatAccount(ctx *gin.Context) {
 		return
 	}
 
+	authPayload, ok := ctx.MustGet(util.AuthorizationPayloadKey).(*token.Payload)
+	if !ok {
+		err := errors.New("mismatched payload type")
+		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
+		return
+	}
+
 	arg := db.CreatAccountParams{
-		Owner:    req.Owner,
+		Owner:    authPayload.Username,
 		Currency: req.Currency,
 		Balance:  0,
 	}
 
 	account, err := server.store.CreatAccount(ctx, arg)
 	if err != nil {
+		if pqErr, ok := err.(*pq.Error); ok {
+			switch pqErr.Code.Name() {
+			case "foreign_key_violation", "unique_violation":
+				ctx.JSON(http.StatusForbidden, errorResponse(err))
+				return
+			}
+		}
 		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
 		return
 	}
@@ -56,6 +73,18 @@ func (server *Server) getAccount(ctx *gin.Context) {
 		return
 	}
 
+	authPayload, ok := ctx.MustGet(util.AuthorizationPayloadKey).(*token.Payload)
+	if !ok {
+		err := errors.New("mismatched payload type")
+		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
+		return
+	}
+	if authPayload.Username != account.Owner {
+		err := errors.New("account doesn't belong ot the authenticiated user")
+		ctx.JSON(http.StatusUnauthorized, errorResponse(err))
+		return
+	}
+
 	ctx.JSON(http.StatusOK, account)
 }
 
@@ -67,6 +96,25 @@ func (server *Server) deleteAccount(ctx *gin.Context) {
 	var req deleteAccountRequest
 	if err := ctx.ShouldBindUri(&req); err != nil {
 		ctx.JSON(http.StatusBadRequest, errorResponse(err))
+		return
+	}
+
+	authPayload, ok := ctx.MustGet(util.AuthorizationPayloadKey).(*token.Payload)
+	if !ok {
+		err := errors.New("mismatched payload type")
+		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
+		return
+	}
+
+	account, err := server.store.GetAccount(ctx, req.ID)
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
+		return
+	}
+
+	if authPayload.Username != account.Owner {
+		err := errors.New("account doesn't belong ot the authenticiated user")
+		ctx.JSON(http.StatusUnauthorized, errorResponse(err))
 		return
 	}
 
@@ -93,11 +141,20 @@ func (server *Server) listAccount(ctx *gin.Context) {
 		ctx.JSON(http.StatusBadRequest, errorResponse(err))
 		return
 	}
-	arg := db.GetAllAccountsParams{
+
+	authPayload, ok := ctx.MustGet(util.AuthorizationPayloadKey).(*token.Payload)
+	if !ok {
+		err := errors.New("mismatched payload type")
+		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
+		return
+	}
+
+	arg := db.GetAllAccountsByOwnerParams{
+		Owner:  authPayload.Username,
 		Limit:  req.PageSize,
 		Offset: (req.PageID - 1) * req.PageSize,
 	}
-	accounts, err := server.store.GetAllAccounts(ctx, arg)
+	accounts, err := server.store.GetAllAccountsByOwner(ctx, arg)
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
 		return

@@ -13,21 +13,28 @@ type Querier interface {
 	CreatAccount(ctx context.Context, arg CreatAccountParams) (Account, error)
 	CreatEntry(ctx context.Context, arg CreatEntryParams) (Entry, error)
 	CreatTransfer(ctx context.Context, arg CreatTransferParams) (Transfer, error)
+	CreatUser(ctx context.Context, arg CreatUserParams) (User, error)
 	DeleteAccount(ctx context.Context, id int64) error
 	DeleteEntry(ctx context.Context, id int64) error
 	DeleteTransfer(ctx context.Context, id int64) error
+	DeleteUser(ctx context.Context, username string) error
 	GetAccount(ctx context.Context, id int64) (Account, error)
 	GetAccountForUpdate(ctx context.Context, id int64) (Account, error)
 	GetAllAccounts(ctx context.Context, arg GetAllAccountsParams) ([]Account, error)
+	GetAllAccountsByOwner(ctx context.Context, arg GetAllAccountsByOwnerParams) ([]Account, error)
 	GetAllEntries(ctx context.Context, arg GetAllEntriesParams) ([]Entry, error)
 	GetAllTransfers(ctx context.Context, arg GetAllTransfersParams) ([]Transfer, error)
+	GetAllUsers(ctx context.Context, arg GetAllUsersParams) ([]User, error)
 	GetEntry(ctx context.Context, id int64) (Entry, error)
 	GetEntryForUpdate(ctx context.Context, id int64) (Entry, error)
 	GetTransfer(ctx context.Context, id int64) (Transfer, error)
 	GetTransferForUpdate(ctx context.Context, id int64) (Transfer, error)
+	GetUser(ctx context.Context, username string) (User, error)
+	GetUserForUpdate(ctx context.Context, username string) (User, error)
 	UpdateAccount(ctx context.Context, arg UpdateAccountParams) (Account, error)
 	UpdateEntry(ctx context.Context, arg UpdateEntryParams) (Entry, error)
 	UpdateTransfer(ctx context.Context, arg UpdateTransferParams) (Transfer, error)
+	UpdateUser(ctx context.Context, arg UpdateUserParams) (User, error)
 }
 
 var _ Querier = (*Queries)(nil)
