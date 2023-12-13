@@ -11,7 +11,7 @@ import (
 )
 
 func creatRandomUser(t *testing.T) db.User {
-	hashedPassword, err := util.HashPassword(util.RandomString(8))
+	hashedPassword, err := util.HashPassword("secret")
 	require.NoError(t, err)
 	require.NotEmpty(t, hashedPassword)
 
