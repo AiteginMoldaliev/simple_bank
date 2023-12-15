@@ -50,6 +50,7 @@ func (server *Server) setupRouter() {
 	api.POST("/users", server.creatUser)
 	api.GET("/users/:username", server.getUser)
 	api.POST("/users/login", server.loginUser)
+	api.POST("/tokens/renew_access", server.renewAccessToken)
 
 	authRoutes := api.Group("/").Use(middleware.PasetoAuthMiddleware(server.pasetoMaker))
 

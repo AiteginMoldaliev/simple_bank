@@ -7,11 +7,11 @@ import (
 )
 
 type JwtMaker interface {
-	CraeteToken(username string, duration time.Duration) (string, error)
+	CraeteToken(username string, duration time.Duration) (string, *Payload, error)
 	VerifiToken(token string) (jwt.MapClaims, error)
 }
 
 type PMaker interface {
-	CraeteToken(username string, duration time.Duration) (string, error)
+	CraeteToken(username string, duration time.Duration) (string, *Payload, error)
 	VerifiToken(token string) (*Payload, error)
 } 

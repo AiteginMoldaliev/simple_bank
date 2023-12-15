@@ -21,9 +21,10 @@ func TestJWTMaker(t *testing.T) {
 	issudeAt := time.Now()
 	expiredAt := issudeAt.Add(duration)
 
-	jwtToken, err := maker.CraeteToken(username, duration)
+	jwtToken, payload, err := maker.CraeteToken(username, duration)
 	require.NoError(t, err)
 	require.NotEmpty(t, jwtToken)
+	require.NotEmpty(t, payload)
 
 	claims, err := maker.VerifiToken(jwtToken)
 	require.NoError(t, err)
@@ -46,9 +47,10 @@ func TestExpiredJWTToken(t *testing.T) {
 	maker, err := token.NewJWTMaker(util.RandomString(32))
 	require.NoError(t, err)
 
-	jwtToken, err := maker.CraeteToken(util.RandomOwner(), -time.Minute)
+	jwtToken, payload, err := maker.CraeteToken(util.RandomOwner(), -time.Minute)
 	require.NoError(t, err)
 	require.NotEmpty(t, jwtToken)
+	require.NotEmpty(t, payload)
 
 	claims, err := maker.VerifiToken(jwtToken)
 	require.Error(t, err)
