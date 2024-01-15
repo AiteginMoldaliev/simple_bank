@@ -13,7 +13,7 @@ COPY app.env .
 COPY bin/start.sh .
 COPY bin/wait-for .
 COPY db/migration ./migration
-RUN chmod +x /app/start.sh
+RUN chmod +x /app/start.sh /app/wait-for
 
 EXPOSE 8080
 ENTRYPOINT [ "/app/start.sh" ]
